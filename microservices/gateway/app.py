@@ -3,61 +3,48 @@ from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
 
-# ============================================
-# API GATEWAY (Microservice)
-# Serveerib veebilehte ja suunab päringud teenustele
-# See on "sissepääsupunkt" mida kasutaja näeb
-# Port: 5000
-# ============================================
-
 USERS_SERVICE = "http://users:5001"
 PRODUCTS_SERVICE = "http://products:5002"
 ORDERS_SERVICE = "http://orders:5003"
+REVIEWS_SERVICE = "http://reviews:5004"
 
 
 @app.route("/")
 def index():
-    # Kogume andmed kõigist teenustest
-    users = []
-    products = []
-    orders = []
-    services_status = {}
+    users, products, orders = [], [], []
+    services = {}
+
+    for name, url, key in [
+        ("users", f"{USERS_SERVICE}/users", "users"),
+        ("products", f"{PRODUCTS_SERVICE}/products", "products"),
+        ("orders", f"{ORDERS_SERVICE}/orders", "orders"),
+    ]:
+        try:
+            resp = requests.get(url, timeout=2)
+            locals()[key] if False else None
+            if name == "users": users = resp.json().get("users", [])
+            if name == "products": products = resp.json().get("products", [])
+            if name == "orders": orders = resp.json().get("orders", [])
+            services[name] = "online"
+        except Exception:
+            services[name] = "offline"
 
     try:
-        resp = requests.get(f"{USERS_SERVICE}/users", timeout=2)
-        users = resp.json().get("users", [])
-        services_status["users"] = "online"
+        requests.get(f"{REVIEWS_SERVICE}/reviews", timeout=2)
+        services["reviews"] = "online"
     except Exception:
-        services_status["users"] = "offline"
-
-    try:
-        resp = requests.get(f"{PRODUCTS_SERVICE}/products", timeout=2)
-        products = resp.json().get("products", [])
-        services_status["products"] = "online"
-    except Exception:
-        services_status["products"] = "offline"
-
-    try:
-        resp = requests.get(f"{ORDERS_SERVICE}/orders", timeout=2)
-        orders = resp.json().get("orders", [])
-        services_status["orders"] = "online"
-    except Exception:
-        services_status["orders"] = "offline"
+        services["reviews"] = "offline"
 
     return render_template("index.html",
-                           users=users,
-                           products=products,
-                           orders=orders,
-                           services=services_status)
+                           users=users, products=products,
+                           orders=orders, services=services)
 
 
-# Proxy API päringuid teenustele
 @app.route("/api/orders", methods=["POST"])
 def create_order():
     try:
         resp = requests.post(f"{ORDERS_SERVICE}/orders",
-                             json=request.get_json(),
-                             timeout=5)
+                             json=request.get_json(), timeout=5)
         return jsonify(resp.json()), resp.status_code
     except requests.ConnectionError:
         return jsonify({"error": "Tellimuste teenus ei ole kättesaadav!"}), 503
@@ -69,7 +56,7 @@ def get_orders():
         resp = requests.get(f"{ORDERS_SERVICE}/orders", timeout=2)
         return jsonify(resp.json())
     except requests.ConnectionError:
-        return jsonify({"error": "Tellimuste teenus ei ole kättesaadav!"}), 503
+        return jsonify({"orders": []})
 
 
 if __name__ == "__main__":

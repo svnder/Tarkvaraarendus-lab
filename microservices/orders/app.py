@@ -3,13 +3,6 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-# ============================================
-# TELLIMUSTE TEENUS (Microservice)
-# Vastutab tellimuste eest
-# Suhtleb teiste teenustega HTTP kaudu!
-# Port: 5003
-# ============================================
-
 USERS_SERVICE = "http://users:5001"
 PRODUCTS_SERVICE = "http://products:5002"
 
@@ -19,11 +12,7 @@ next_order_id = 1
 
 @app.route("/", methods=["GET"])
 def index():
-    return jsonify({
-        "service": "Tellimuste teenus",
-        "port": 5003,
-        "depends_on": ["users:5001", "products:5002"]
-    })
+    return jsonify({"service": "Tellimuste teenus", "port": 5003})
 
 
 @app.route("/orders", methods=["GET"])
@@ -39,20 +28,18 @@ def create_order():
     if not data or "user_id" not in data or "product_id" not in data:
         return jsonify({"error": "Vajalikud väljad: user_id, product_id, quantity"}), 400
 
-    # Pärime kasutaja infot KASUTAJATE TEENUSEST
     try:
         user_resp = requests.get(f"{USERS_SERVICE}/users/{data['user_id']}")
         if user_resp.status_code != 200:
-            return jsonify({"error": "Kasutajat ei leitud (kasutajate teenus vastas veaga)"}), 404
+            return jsonify({"error": "Kasutajat ei leitud"}), 404
         user = user_resp.json()
     except requests.ConnectionError:
         return jsonify({"error": "Kasutajate teenus ei ole kättesaadav!"}), 503
 
-    # Pärime toote infot TOODETE TEENUSEST
     try:
         product_resp = requests.get(f"{PRODUCTS_SERVICE}/products/{data['product_id']}")
         if product_resp.status_code != 200:
-            return jsonify({"error": "Toodet ei leitud (toodete teenus vastas veaga)"}), 404
+            return jsonify({"error": "Toodet ei leitud"}), 404
         product = product_resp.json()
     except requests.ConnectionError:
         return jsonify({"error": "Toodete teenus ei ole kättesaadav!"}), 503
@@ -60,19 +47,13 @@ def create_order():
     quantity = data.get("quantity", 1)
     total = product["price"] * quantity
 
-    discount = 0
-    if quantity >= 5:
-        discount = total * 0.10
-        total = total - discount
-
     order = {
         "id": next_order_id,
         "user": user["name"],
         "product": product["name"],
         "quantity": quantity,
         "total": round(total, 2),
-        "status": "created",
-        "discount": round(discount, 2)
+        "status": "created"
     }
     orders.append(order)
     next_order_id += 1

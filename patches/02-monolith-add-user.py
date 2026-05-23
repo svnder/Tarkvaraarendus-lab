@@ -13,4 +13,7 @@ else:
     content = content.replace(OLD, NEW)
     with open(FILE, "w", encoding="utf-8") as f:
         f.write(content)
-    print("✅ Kati Kask lisatud! Käivita: docker compose -f docker-compose.monolith.yml up --build")
+    print("✅ Kati Kask lisatud monolith/app.py faili!")
+    print("")
+    print("Järgmine samm — käivita rakendus uuesti:")
+    print("  docker compose -f docker-compose.monolith.yml up --build")

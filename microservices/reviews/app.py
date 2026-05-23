@@ -3,13 +3,6 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-# ============================================
-# ARVUSTUSTE TEENUS (Microservice)
-# Vastutab tootearvustuste eest
-# Suhtleb toodete ja kasutajate teenusega
-# Port: 5004
-# ============================================
-
 USERS_SERVICE = "http://users:5001"
 PRODUCTS_SERVICE = "http://products:5002"
 
@@ -19,11 +12,7 @@ next_review_id = 1
 
 @app.route("/", methods=["GET"])
 def index():
-    return jsonify({
-        "service": "Arvustuste teenus",
-        "port": 5004,
-        "depends_on": ["users:5001", "products:5002"]
-    })
+    return jsonify({"service": "Arvustuste teenus", "port": 5004})
 
 
 @app.route("/reviews", methods=["GET"])
@@ -48,7 +37,6 @@ def create_review():
     if not 1 <= data["rating"] <= 5:
         return jsonify({"error": "Hinne peab olema 1-5"}), 400
 
-    # Kontrollime kasutajat
     try:
         user_resp = requests.get(f"{USERS_SERVICE}/users/{data['user_id']}")
         if user_resp.status_code != 200:
@@ -57,7 +45,6 @@ def create_review():
     except requests.ConnectionError:
         return jsonify({"error": "Kasutajate teenus ei ole kättesaadav!"}), 503
 
-    # Kontrollime toodet
     try:
         product_resp = requests.get(f"{PRODUCTS_SERVICE}/products/{data['product_id']}")
         if product_resp.status_code != 200:

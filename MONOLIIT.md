@@ -1,6 +1,6 @@
 # Monoliit
 
-Monoliitses arhitektuuris on **kõik ühes rakenduses** — kasutajad, tooted ja tellimused on samas failis, samas konteineris, samal pordil.
+Monoliitses arhitektuuris on **kõik ühes rakenduses** — kasutajad, tooted ja tellimused on samas failis, samas konteineris, samal pordil 5050.
 
 ---
 
@@ -9,7 +9,11 @@ Monoliitses arhitektuuris on **kõik ühes rakenduses** — kasutajad, tooted ja
 Veendu et oled repo juurkaustas:
 
 ```bash
+# Mac / Linux
 cd ~/Tarkvaraarendus-lab
+
+# Windows
+cd ~\Tarkvaraarendus-lab
 ```
 
 ---
@@ -20,7 +24,7 @@ cd ~/Tarkvaraarendus-lab
 docker compose -f docker-compose.monolith.yml up --build
 ```
 
-Oota kuni näed:
+Oota kuni terminal näitab:
 ```
 epood-monolith  |  * Running on all addresses (0.0.0.0)
 ```
@@ -29,190 +33,150 @@ Ava brauseris: **http://localhost:5050**
 
 ---
 
-## 2. Testi rakendust
+## 2. Tutvu rakendusega
 
 1. Vaata tooteid ja kasutajaid lehel
-2. Loo tellimus — vali kasutaja ID, toote ID ja kogus
+2. Loo tellimus — sisesta kasutaja ID, toote ID ja kogus
 3. Vaata kuidas tellimus ilmub nimekirja
 
-Testi terminalist (ava uus aken Cmd+T):
+**Testi terminalist** (ava uus aken):
 
 ```bash
+# Vaata kasutajaid
 curl http://localhost:5050/api/users
+
+# Vaata tooteid
 curl http://localhost:5050/api/products
-curl -X POST http://localhost:5050/api/orders \
-  -H "Content-Type: application/json" \
-  -d '{"user_id": 1, "product_id": 2, "quantity": 3}'
+
+# Loo tellimus
+curl -X POST http://localhost:5050/api/orders -H "Content-Type: application/json" -d "{\"user_id\": 1, \"product_id\": 2, \"quantity\": 3}"
 ```
 
 ---
 
-## 3. Vaata koodi struktuuri
+## 3. Vaata koodi
 
-Ava `monolith/app.py` ja pane tähele — **kõik on ühes failis**:
+Ava fail `monolith/app.py`. Pane tähele — **kõik on ühes failis**:
 - Kasutajate andmed ja endpointid
 - Toodete andmed ja endpointid
 - Tellimuste loogika ja endpointid
 
-> **Küsimus:** Mis juhtub kui 10 arendajat töötavad korraga selle ühe faili kallal?
+> **Küsimus:** Kui 10 arendajat töötavad korraga selle ühe faili kallal, mis probleemid tekivad?
 
 ---
 
-## 4. Ülesanne: Lisa uus toode
+## 4. Lisa uus toode
 
-Lisa uus toode: **Monitor**, hind **349.99**, emoji **🖥️**.
+Lisa toode: **Monitor**, hind **349.99**, emoji **🖥️**
 
-**Muudatus failis** `monolith/app.py`:
-
-```diff
- products = [
-     {"id": 1, "name": "Sülearvuti", "price": 899.99, "emoji": "💻"},
-     {"id": 2, "name": "Hiir", "price": 29.99, "emoji": "🖱️"},
-     {"id": 3, "name": "Klaviatuur", "price": 79.99, "emoji": "⌨️"},
-+    {"id": 4, "name": "Monitor", "price": 349.99, "emoji": "🖥️"},
- ]
-```
-
-Või käsuga:
+**Samm 1 — muuda koodi:**
 
 ```bash
 python3 patches/01-monolith-add-product.py
 ```
 
-Rebuild:
+**Samm 2 — käivita uuesti:**
 
 ```bash
 docker compose -f docker-compose.monolith.yml up --build
 ```
 
-Kontrolli brauserist — uus toode peaks ilmuma.
+**Samm 3 — kontrolli brauserist** http://localhost:5050 — Monitor peaks ilmuma toodete nimekirja.
 
 ---
 
-## 5. Ülesanne: Lisa uus kasutaja
+## 5. Lisa uus kasutaja
 
-Lisa kasutaja: **Kati Kask**, email **kati@example.com**.
+Lisa kasutaja: **Kati Kask**, email **kati@example.com**
 
-**Muudatus failis** `monolith/app.py`:
-
-```diff
- users = [
-     {"id": 1, "name": "Mari Maasikas", "email": "mari@example.com"},
-     {"id": 2, "name": "Jaan Jansen", "email": "jaan@example.com"},
-+    {"id": 3, "name": "Kati Kask", "email": "kati@example.com"},
- ]
-```
-
-Või käsuga:
+**Samm 1 — muuda koodi:**
 
 ```bash
 python3 patches/02-monolith-add-user.py
 ```
 
-Rebuild:
+**Samm 2 — käivita uuesti:**
 
 ```bash
 docker compose -f docker-compose.monolith.yml up --build
 ```
 
----
+**Samm 3 — kontrolli:**
 
-## 6. Ülesanne: Lisa otsingu endpoint
-
-Lisa toodete otsimine nime järgi.
-
-**Muudatus failis** `monolith/app.py` — lisa see kood **enne** `get_product` funktsiooni:
-
-```diff
-+@app.route("/api/products/search", methods=["GET"])
-+def search_products():
-+    query = request.args.get("name", "").lower()
-+    if not query:
-+        return jsonify({"error": "Lisa parameeter ?name=otsingusõna"}), 400
-+    results = [p for p in products if query in p["name"].lower()]
-+    return jsonify({"results": results, "count": len(results)})
-+
- @app.route("/api/products/<int:product_id>", methods=["GET"])
+```bash
+curl http://localhost:5050/api/users
 ```
 
-Või käsuga:
+---
+
+## 6. Lisa otsingu endpoint
+
+Lisa toote otsimine nime järgi.
+
+**Samm 1 — muuda koodi:**
 
 ```bash
 python3 patches/03-monolith-add-search.py
 ```
 
-Rebuild ja testi:
+**Samm 2 — käivita uuesti:**
 
 ```bash
 docker compose -f docker-compose.monolith.yml up --build
+```
+
+**Samm 3 — testi:**
+
+```bash
 curl "http://localhost:5050/api/products/search?name=hiir"
 ```
 
 ---
 
-## 7. Ülesanne: Lisa allahindlus
+## 7. Lisa allahindlus
 
-Lisa loogika: kogus >= 5 → 10% allahindlus.
+Lisa loogika: **kogus 5 või rohkem → 10% allahindlus**.
 
-**Muudatus failis** `monolith/app.py` — leia `create_order` funktsioon:
-
-```diff
-     quantity = data.get("quantity", 1)
-     total = product["price"] * quantity
-
-+    discount = 0
-+    if quantity >= 5:
-+        discount = total * 0.10
-+        total = total - discount
-+
-     order = {
-         ...
-         "total": round(total, 2),
--        "status": "created"
-+        "status": "created",
-+        "discount": round(discount, 2)
-     }
-```
-
-Või käsuga:
+**Samm 1 — muuda koodi:**
 
 ```bash
 python3 patches/04-monolith-add-discount.py
 ```
 
-Rebuild ja testi — telli 5+ toodet:
+**Samm 2 — käivita uuesti:**
 
 ```bash
 docker compose -f docker-compose.monolith.yml up --build
-curl -X POST http://localhost:5050/api/orders \
-  -H "Content-Type: application/json" \
-  -d '{"user_id": 1, "product_id": 2, "quantity": 5}'
 ```
+
+**Samm 3 — testi** (telli 5 toodet):
+
+```bash
+curl -X POST http://localhost:5050/api/orders -H "Content-Type: application/json" -d "{\"user_id\": 1, \"product_id\": 2, \"quantity\": 5}"
+```
+
+Kontrolli brauserist — tellimusel peaks olema allahindluse summa näha.
 
 ---
 
 ## 8. Vaata logisid
 
-Ava uus terminali aken (Cmd+T) ja:
+Ava uus terminali aken ja:
 
 ```bash
 docker logs -f epood-monolith
 ```
 
-Loo brauseris tellimus — näed terminalis kõiki päringuid **ühes kohas**.
+Loo brauseris tellimus. Näed terminalis kõiki päringuid **ühes kohas**.
 
-> **Küsimus:** Kas üks log on mugav või tekitab probleeme?
+> **Küsimus:** Kas üks log on mugav või tekitab probleeme suure rakenduse puhul?
 
 ---
 
 ## 9. Kiiruse mõõtmine
 
 ```bash
-for i in 1 2 3 4 5; do
-  time curl -s -X POST http://localhost:5050/api/orders \
-    -H "Content-Type: application/json" \
-    -d '{"user_id": 1, "product_id": 1, "quantity": 1}' > /dev/null
-done
+for i in 1 2 3 4 5; do time curl -s -X POST http://localhost:5050/api/orders -H "Content-Type: application/json" -d "{\"user_id\": 1, \"product_id\": 1, \"quantity\": 1}" > /dev/null; done
 ```
 
 Pane kirja keskmine `real` väärtus — võrdled hiljem mikroteenustega.
@@ -225,4 +189,4 @@ Pane kirja keskmine `real` väärtus — võrdled hiljem mikroteenustega.
 docker compose -f docker-compose.monolith.yml down
 ```
 
-Järgmiseks: **[MIKROTEENUSED.md](MIKROTEENUSED.md)**
+Jätka: **[MIKROTEENUSED.md](MIKROTEENUSED.md)**

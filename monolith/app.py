@@ -7,7 +7,6 @@ app = Flask(__name__)
 # Kõik on ühes failis: kasutajad, tooted, tellimused
 # ============================================
 
-# "Andmebaas" - lihtsuse mõttes hoiame mälus
 users = [
     {"id": 1, "name": "Mari Maasikas", "email": "mari@example.com"},
     {"id": 2, "name": "Jaan Jansen", "email": "jaan@example.com"},
@@ -23,14 +22,10 @@ orders = []
 next_order_id = 1
 
 
-# ---------- VEEBILEHT ----------
-
 @app.route("/")
 def index():
     return render_template("index.html", users=users, products=products, orders=orders)
 
-
-# ---------- API: KASUTAJAD ----------
 
 @app.route("/api/users", methods=["GET"])
 def get_users():
@@ -45,8 +40,6 @@ def get_user(user_id):
     return jsonify(user)
 
 
-# ---------- API: TOOTED ----------
-
 @app.route("/api/products", methods=["GET"])
 def get_products():
     return jsonify({"products": products})
@@ -59,8 +52,6 @@ def get_product(product_id):
         return jsonify({"error": "Toodet ei leitud"}), 404
     return jsonify(product)
 
-
-# ---------- API: TELLIMUSED ----------
 
 @app.route("/api/orders", methods=["GET"])
 def get_orders():

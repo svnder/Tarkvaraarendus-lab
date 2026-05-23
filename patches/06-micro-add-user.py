@@ -13,4 +13,7 @@ else:
     content = content.replace(OLD, NEW)
     with open(FILE, "w", encoding="utf-8") as f:
         f.write(content)
-    print("✅ Kati Kask lisatud! Käivita: docker compose -f docker-compose.microservices.yml up --build")
+    print("✅ Kati Kask lisatud microservices/users/app.py faili!")
+    print("")
+    print("Järgmine samm — käivita teenused uuesti:")
+    print("  docker compose -f docker-compose.microservices.yml up --build")

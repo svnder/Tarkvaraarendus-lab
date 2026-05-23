@@ -18,7 +18,6 @@
     </nav>
 
     <div class="container">
-        <!-- Arhitektuuri info -->
         <div class="arch-banner">
             <div class="arch-icon">🏗️</div>
             <div class="arch-text">
@@ -26,7 +25,7 @@
                 <p>Kõik teenused jooksevad <strong>ühes rakenduses</strong>, ühes konteineris, ühel pordil.</p>
             </div>
             <div class="arch-diagram">
-                <div class="arch-box arch-box--mono">
+                <div class="arch-box">
                     <span>👤 Kasutajad</span>
                     <span>📦 Tooted</span>
                     <span>🛒 Tellimused</span>
@@ -35,7 +34,6 @@
             </div>
         </div>
 
-        <!-- Tooted -->
         <section class="section">
             <div class="section-header">
                 <h2>Tooted</h2>
@@ -55,7 +53,6 @@
             </div>
         </section>
 
-        <!-- Kasutajad -->
         <section class="section">
             <div class="section-header">
                 <h2>Kasutajad</h2>
@@ -75,7 +72,6 @@
             </div>
         </section>
 
-        <!-- Tellimuse loomine -->
         <section class="section">
             <div class="section-header">
                 <h2>Loo tellimus</h2>
@@ -84,24 +80,24 @@
             <div class="order-form-card">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="user_id">Kasutaja ID</label>
+                        <label>Kasutaja ID</label>
                         <input type="number" id="user_id" value="1" min="1">
                     </div>
                     <div class="form-group">
-                        <label for="product_id">Toote ID</label>
+                        <label>Toote ID</label>
                         <input type="number" id="product_id" value="1" min="1">
                     </div>
                     <div class="form-group">
-                        <label for="quantity">Kogus</label>
+                        <label>Kogus</label>
                         <input type="number" id="quantity" value="1" min="1">
                     </div>
                     <button onclick="createOrder()" class="btn-order">Loo tellimus</button>
                 </div>
+                <p class="discount-hint">💡 Vihje: telli 5+ toodet ja vaata mis juhtub!</p>
                 <div id="order-result" class="order-result" style="display:none;"></div>
             </div>
         </section>
 
-        <!-- Tellimused -->
         <section class="section">
             <div class="section-header">
                 <h2>Tellimused</h2>
@@ -122,7 +118,6 @@
             const userId = parseInt(document.getElementById('user_id').value);
             const productId = parseInt(document.getElementById('product_id').value);
             const quantity = parseInt(document.getElementById('quantity').value);
-
             const resultDiv = document.getElementById('order-result');
 
             try {
@@ -134,8 +129,13 @@
                 const data = await response.json();
 
                 if (response.ok) {
+                    const order = data.order;
+                    let msg = `✅ ${order.user} tellis ${order.quantity}x ${order.product} — €${order.total.toFixed(2)}`;
+                    if (order.discount && order.discount > 0) {
+                        msg += ` <span class="discount-badge">🎉 -10% allahindlus: -€${order.discount.toFixed(2)}</span>`;
+                    }
                     resultDiv.className = 'order-result success';
-                    resultDiv.innerHTML = `✅ ${data.message} — ${data.order.user} tellis ${data.order.quantity}x ${data.order.product} (€${data.order.total.toFixed(2)})`;
+                    resultDiv.innerHTML = msg;
                 } else {
                     resultDiv.className = 'order-result error';
                     resultDiv.innerHTML = `❌ Viga: ${data.error}`;
@@ -166,7 +166,10 @@
                         <div class="order-details">
                             <strong>${order.user}</strong> — ${order.quantity}x ${order.product}
                         </div>
-                        <div class="order-total">€${order.total.toFixed(2)}</div>
+                        <div class="order-right">
+                            <div class="order-total">€${order.total.toFixed(2)}</div>
+                            ${order.discount && order.discount > 0 ? `<div class="order-discount">-€${order.discount.toFixed(2)}</div>` : ''}
+                        </div>
                         <div class="order-status">${order.status}</div>
                     </div>
                 `).join('');

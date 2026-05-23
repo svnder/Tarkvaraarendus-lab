@@ -1,14 +1,23 @@
 # Tarkvaraarenduse labor: Monoliit vs Mikroteenused
 
-Selles laboris võrdled kahte arhitektuurimudelit — **monoliitset** ja **mikroteenuste** põhist rakendust. Mõlemad teevad sama asja (lihtne e-poe rakendus), aga on üles ehitatud täiesti erinevalt.
+Selles laboris uurid kahte erinevat arhitektuurimudelit. Mõlemad rakendused teevad sama asja — lihtne e-poe rakendus kasutajate, toodete ja tellimustega — aga on üles ehitatud täiesti erinevalt.
 
 ---
 
 ## Eeldused
 
 - Docker ja Docker Compose on paigaldatud
-- Terminal on tuttav
 - Git on paigaldatud
+- Python 3 on paigaldatud
+
+---
+
+## Repo kloonimine
+
+```bash
+git clone https://github.com/svnder/Tarkvaraarendus-lab.git
+cd Tarkvaraarendus-lab
+```
 
 ---
 
@@ -16,49 +25,24 @@ Selles laboris võrdled kahte arhitektuurimudelit — **monoliitset** ja **mikro
 
 ```
 Tarkvaraarendus-lab/
-├── monolith/                        # MONOLIIT — kõik ühes rakenduses
+├── monolith/                        # Monoliit — kõik ühes rakenduses
 │   ├── app.py                       # Kogu rakendus ühes failis
-│   ├── templates/index.html         # Veebileht
-│   ├── static/style.css             # Stiilid
+│   ├── templates/index.html
+│   ├── static/style.css
 │   ├── requirements.txt
 │   └── Dockerfile
-├── microservices/                   # MIKROTEENUSED — eraldi teenused
+├── microservices/                   # Mikroteenused — eraldi teenused
 │   ├── users/                       # Kasutajate teenus (port 5051)
 │   ├── products/                    # Toodete teenus (port 5052)
 │   ├── orders/                      # Tellimuste teenus (port 5053)
 │   ├── reviews/                     # Arvustuste teenus (port 5054)
-│   └── gateway/                     # Veebileht ja API Gateway (port 5070)
-├── patches/                         # Koodimuudatused ülesannete jaoks
+│   └── gateway/                     # Veebileht ja sisend (port 5070)
+├── patches/                         # Skriptid koodi muutmiseks
 ├── docker-compose.monolith.yml
 ├── docker-compose.microservices.yml
-├── MONOLIIT.md                      # Monoliidi ülesanded
-└── MIKROTEENUSED.md                 # Mikroteenuste ülesanded
+├── MONOLIIT.md                      ← Monoliidi juhend
+└── MIKROTEENUSED.md                 ← Mikroteenuste juhend
 ```
-
----
-
-## Kuidas alustada?
-
-Vali kumba soovid uurida:
-
-- 👉 **[MONOLIIT.md](MONOLIIT.md)** — kõik ühes rakenduses, üks server, üks port
-- 👉 **[MIKROTEENUSED.md](MIKROTEENUSED.md)** — eraldi teenused, eraldi konteinerid, eraldi pordid
-
----
-
-## Alusta nullist
-
-Kui midagi läks valesti ja tahad kõik taastada algse seisu:
-
-```bash
-cd ~/Tarkvaraarendus-lab
-docker compose -f docker-compose.monolith.yml down
-docker compose -f docker-compose.microservices.yml down
-docker system prune -f
-git checkout -- .
-```
-
-Seejärel käivita uuesti valitud juhendi järgi.
 
 ---
 
@@ -75,29 +59,67 @@ Seejärel käivita uuesti valitud juhendi järgi.
 
 ---
 
-## Vihjed probleemide korral
+## Alusta siit
 
-**Veendu et oled alati repo juurkaustas:**
+👉 **[MONOLIIT.md](MONOLIIT.md)** — käivita ja uuri monoliitset rakendust
+
+👉 **[MIKROTEENUSED.md](MIKROTEENUSED.md)** — käivita ja uuri mikroteenuseid
+
+---
+
+## Alusta nullist
+
+Kui midagi läks valesti, taasta kõik algse seisu:
+
 ```bash
+# Mac / Linux
+docker compose -f docker-compose.monolith.yml down
+docker compose -f docker-compose.microservices.yml down
+docker system prune -f
+git checkout -- .
+
+# Windows (PowerShell)
+docker compose -f docker-compose.monolith.yml down
+docker compose -f docker-compose.microservices.yml down
+docker system prune -f
+git checkout -- .
+```
+
+Seejärel käivita uuesti valitud juhendi järgi.
+
+---
+
+## Probleemide lahendamine
+
+**Veendu alati et oled repo juurkaustas:**
+
+```bash
+# Mac / Linux
 cd ~/Tarkvaraarendus-lab
-pwd
-# Peaks näitama: /Users/sander/Tarkvaraarendus-lab
+
+# Windows
+cd ~\Tarkvaraarendus-lab
 ```
 
 **Port on hõivatud:**
+
 ```bash
+# Mac / Linux
 lsof -i :5050
-# macOS: AirPlay kasutab porti 5000 → kasutame 5050+
-# Firefox blokeerib porti 5060 → gateway on pordil 5070
+
+# Windows
+netstat -ano | findstr :5050
 ```
 
-**Muudatused ei kajastu:**
+**Muudatused ei kajastu pärast koodi muutmist:**
+
 ```bash
 docker compose -f docker-compose.monolith.yml down
 docker compose -f docker-compose.monolith.yml up --build
 ```
 
-**Teenus jookseb kokku:**
+**Teenuse logid (veateate leidmiseks):**
+
 ```bash
 docker logs epood-monolith
 docker logs epood-orders
