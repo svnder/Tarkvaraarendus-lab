@@ -8,6 +8,7 @@ services:
       - users
       - products
       - orders
+      - reviews
 
   users:
     build: ./microservices/users
@@ -26,6 +27,15 @@ services:
     ports:
       - "5053:5003"
     container_name: epood-orders
+    depends_on:
+      - users
+      - products
+
+  reviews:
+    build: ./microservices/reviews
+    ports:
+      - "5054:5004"
+    container_name: epood-reviews
     depends_on:
       - users
       - products
