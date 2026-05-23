@@ -1,0 +1,21 @@
+services:
+  users:
+    build: ./microservices/users
+    ports:
+      - "5001:5001"
+    container_name: epood-users
+
+  products:
+    build: ./microservices/products
+    ports:
+      - "5002:5002"
+    container_name: epood-products
+
+  orders:
+    build: ./microservices/orders
+    ports:
+      - "5003:5003"
+    container_name: epood-orders
+    depends_on:
+      - users
+      - products
