@@ -76,7 +76,7 @@ Lisa uus toode: **Monitor**, hind **349.99**, emoji **🖥️**.
 Või käsuga:
 
 ```bash
-git apply patches/01-monolith-add-product.patch
+python3 patches/01-monolith-add-product.py
 ```
 
 Rebuild:
@@ -106,7 +106,7 @@ Lisa kasutaja: **Kati Kask**, email **kati@example.com**.
 Või käsuga:
 
 ```bash
-git apply patches/02-monolith-add-user.patch
+python3 patches/02-monolith-add-user.py
 ```
 
 Rebuild:
@@ -138,7 +138,7 @@ Lisa toodete otsimine nime järgi.
 Või käsuga:
 
 ```bash
-git apply patches/03-monolith-add-search.patch
+python3 patches/03-monolith-add-search.py
 ```
 
 Rebuild ja testi:
@@ -177,7 +177,7 @@ Lisa loogika: kogus >= 5 → 10% allahindlus.
 Või käsuga:
 
 ```bash
-git apply patches/04-monolith-add-discount.patch
+python3 patches/04-monolith-add-discount.py
 ```
 
 Rebuild ja testi — telli 5+ toodet:

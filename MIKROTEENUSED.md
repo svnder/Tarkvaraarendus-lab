@@ -111,7 +111,7 @@ Lisa uus toode: **Monitor**, hind **349.99**, emoji **🖥️**.
 Või käsuga:
 
 ```bash
-git apply patches/05-micro-add-product.patch
+python3 patches/05-micro-add-product.py
 ```
 
 Rebuild:
@@ -141,7 +141,7 @@ Lisa kasutaja: **Kati Kask**, email **kati@example.com**.
 Või käsuga:
 
 ```bash
-git apply patches/06-micro-add-user.patch
+python3 patches/06-micro-add-user.py
 ```
 
 Rebuild:
@@ -176,7 +176,7 @@ Lisa toodete otsimine nime järgi.
 Või käsuga:
 
 ```bash
-git apply patches/07-micro-add-search.patch
+python3 patches/07-micro-add-search.py
 ```
 
 Rebuild ja testi:
@@ -217,7 +217,7 @@ Lisa loogika: kogus >= 5 → 10% allahindlus.
 Või käsuga:
 
 ```bash
-git apply patches/08-micro-add-discount.patch
+python3 patches/08-micro-add-discount.py
 ```
 
 Rebuild ja testi:
