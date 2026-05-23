@@ -5,6 +5,7 @@ app = Flask(__name__)
 # ============================================
 # KASUTAJATE TEENUS (Microservice)
 # Vastutab AINULT kasutajate eest
+# Port: 5001
 # ============================================
 
 users = [

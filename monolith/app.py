@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
 
@@ -14,36 +14,30 @@ users = [
 ]
 
 products = [
-    {"id": 1, "name": "Sülearvuti", "price": 899.99},
-    {"id": 2, "name": "Hiir", "price": 29.99},
-    {"id": 3, "name": "Klaviatuur", "price": 79.99},
+    {"id": 1, "name": "Sülearvuti", "price": 899.99, "emoji": "💻"},
+    {"id": 2, "name": "Hiir", "price": 29.99, "emoji": "🖱️"},
+    {"id": 3, "name": "Klaviatuur", "price": 79.99, "emoji": "⌨️"},
 ]
 
 orders = []
 next_order_id = 1
 
 
-# ---------- KASUTAJAD ----------
+# ---------- VEEBILEHT ----------
 
 @app.route("/")
 def index():
-    return jsonify({
-        "app": "Monoliitne e-pood",
-        "endpoints": {
-            "kasutajad": "/users",
-            "tooted": "/products",
-            "tellimused": "/orders",
-            "tellimuse_loomine": "POST /orders (JSON: user_id, product_id, quantity)"
-        }
-    })
+    return render_template("index.html", users=users, products=products, orders=orders)
 
 
-@app.route("/users", methods=["GET"])
+# ---------- API: KASUTAJAD ----------
+
+@app.route("/api/users", methods=["GET"])
 def get_users():
     return jsonify({"users": users})
 
 
-@app.route("/users/<int:user_id>", methods=["GET"])
+@app.route("/api/users/<int:user_id>", methods=["GET"])
 def get_user(user_id):
     user = next((u for u in users if u["id"] == user_id), None)
     if not user:
@@ -51,14 +45,14 @@ def get_user(user_id):
     return jsonify(user)
 
 
-# ---------- TOOTED ----------
+# ---------- API: TOOTED ----------
 
-@app.route("/products", methods=["GET"])
+@app.route("/api/products", methods=["GET"])
 def get_products():
     return jsonify({"products": products})
 
 
-@app.route("/products/<int:product_id>", methods=["GET"])
+@app.route("/api/products/<int:product_id>", methods=["GET"])
 def get_product(product_id):
     product = next((p for p in products if p["id"] == product_id), None)
     if not product:
@@ -66,14 +60,14 @@ def get_product(product_id):
     return jsonify(product)
 
 
-# ---------- TELLIMUSED ----------
+# ---------- API: TELLIMUSED ----------
 
-@app.route("/orders", methods=["GET"])
+@app.route("/api/orders", methods=["GET"])
 def get_orders():
     return jsonify({"orders": orders})
 
 
-@app.route("/orders", methods=["POST"])
+@app.route("/api/orders", methods=["POST"])
 def create_order():
     global next_order_id
     data = request.get_json()
@@ -81,12 +75,10 @@ def create_order():
     if not data or "user_id" not in data or "product_id" not in data:
         return jsonify({"error": "Vajalikud väljad: user_id, product_id, quantity"}), 400
 
-    # Kontrollime kasutajat
     user = next((u for u in users if u["id"] == data["user_id"]), None)
     if not user:
         return jsonify({"error": "Kasutajat ei leitud"}), 404
 
-    # Kontrollime toodet
     product = next((p for p in products if p["id"] == data["product_id"]), None)
     if not product:
         return jsonify({"error": "Toodet ei leitud"}), 404
@@ -99,7 +91,7 @@ def create_order():
         "user": user["name"],
         "product": product["name"],
         "quantity": quantity,
-        "total": total,
+        "total": round(total, 2),
         "status": "created"
     }
     orders.append(order)

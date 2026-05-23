@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Pood | Mikroteenused</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-icon">📦</span>
+            <span class="nav-title">E-Pood</span>
+        </div>
+        <div class="nav-badge nav-badge--micro">MIKROTEENUSED</div>
+    </nav>
+
+    <div class="container">
+        <!-- Arhitektuuri info -->
+        <div class="arch-banner">
+            <div class="arch-icon">🏗️</div>
+            <div class="arch-text">
+                <h2>Mikroteenuste arhitektuur</h2>
+                <p>Iga teenus jookseb <strong>eraldi konteineris</strong>, oma pordil. Teenused suhtlevad HTTP kaudu.</p>
+            </div>
+            <div class="arch-diagram">
+                <div class="arch-services">
+                    <div class="arch-box arch-box--micro">
+                        <span>🌐 Gateway</span>
+                        <div class="arch-label">Port 5060</div>
+                    </div>
+                    <div class="arch-arrows">→ → →</div>
+                    <div class="arch-box-group">
+                        <div class="arch-box arch-box--micro arch-box--small">
+                            <span>👤 Kasutajad</span>
+                            <div class="arch-label">Port 5051</div>
+                        </div>
+                        <div class="arch-box arch-box--micro arch-box--small">
+                            <span>📦 Tooted</span>
+                            <div class="arch-label">Port 5052</div>
+                        </div>
+                        <div class="arch-box arch-box--micro arch-box--small">
+                            <span>🛒 Tellimused</span>
+                            <div class="arch-label">Port 5053</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teenuste staatus -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Teenuste staatus</h2>
+                <span class="endpoint-tag">LIVE</span>
+            </div>
+            <div class="status-grid">
+                <div class="status-card">
+                    <div class="status-dot {% if services.users == 'online' %}status-dot--online{% else %}status-dot--offline{% endif %}"></div>
+                    <div class="status-info">
+                        <h3>👤 Kasutajate teenus</h3>
+                        <p>Port 5051</p>
+                    </div>
+                    <div class="status-label {% if services.users == 'online' %}status-label--online{% else %}status-label--offline{% endif %}">
+                        {{ services.users | upper }}
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-dot {% if services.products == 'online' %}status-dot--online{% else %}status-dot--offline{% endif %}"></div>
+                    <div class="status-info">
+                        <h3>📦 Toodete teenus</h3>
+                        <p>Port 5052</p>
+                    </div>
+                    <div class="status-label {% if services.products == 'online' %}status-label--online{% else %}status-label--offline{% endif %}">
+                        {{ services.products | upper }}
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-dot {% if services.orders == 'online' %}status-dot--online{% else %}status-dot--offline{% endif %}"></div>
+                    <div class="status-info">
+                        <h3>🛒 Tellimuste teenus</h3>
+                        <p>Port 5053</p>
+                    </div>
+                    <div class="status-label {% if services.orders == 'online' %}status-label--online{% else %}status-label--offline{% endif %}">
+                        {{ services.orders | upper }}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tooted -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Tooted</h2>
+                <span class="endpoint-tag">products:5052/products</span>
+            </div>
+            {% if products %}
+            <div class="product-grid">
+                {% for product in products %}
+                <div class="product-card">
+                    <div class="product-emoji">{{ product.emoji }}</div>
+                    <div class="product-info">
+                        <h3>{{ product.name }}</h3>
+                        <p class="product-price">€{{ "%.2f"|format(product.price) }}</p>
+                    </div>
+                    <div class="product-id">ID: {{ product.id }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="empty-state">Toodete teenus ei ole kättesaadav! 🔴</p>
+            {% endif %}
+        </section>
+
+        <!-- Kasutajad -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Kasutajad</h2>
+                <span class="endpoint-tag">users:5051/users</span>
+            </div>
+            {% if users %}
+            <div class="user-grid">
+                {% for user in users %}
+                <div class="user-card">
+                    <div class="user-avatar">{{ user.name[0] }}</div>
+                    <div class="user-info">
+                        <h3>{{ user.name }}</h3>
+                        <p>{{ user.email }}</p>
+                    </div>
+                    <div class="user-id">ID: {{ user.id }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="empty-state">Kasutajate teenus ei ole kättesaadav! 🔴</p>
+            {% endif %}
+        </section>
+
+        <!-- Tellimuse loomine -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Loo tellimus</h2>
+                <span class="endpoint-tag">orders:5053/orders</span>
+            </div>
+            <div class="order-form-card">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="user_id">Kasutaja ID</label>
+                        <input type="number" id="user_id" value="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="product_id">Toote ID</label>
+                        <input type="number" id="product_id" value="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Kogus</label>
+                        <input type="number" id="quantity" value="1" min="1">
+                    </div>
+                    <button onclick="createOrder()" class="btn-order">Loo tellimus</button>
+                </div>
+                <div id="order-result" class="order-result" style="display:none;"></div>
+            </div>
+        </section>
+
+        <!-- Tellimused -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Tellimused</h2>
+                <span class="endpoint-tag">orders:5053/orders</span>
+            </div>
+            <div id="orders-list" class="orders-list">
+                <p class="empty-state">Tellimusi pole veel. Loo esimene! ☝️</p>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p>Tarkvaraarenduse labor — Monoliit vs Mikroteenused</p>
+    </footer>
+
+    <script>
+        async function createOrder() {
+            const userId = parseInt(document.getElementById('user_id').value);
+            const productId = parseInt(document.getElementById('product_id').value);
+            const quantity = parseInt(document.getElementById('quantity').value);
+
+            const resultDiv = document.getElementById('order-result');
+
+            try {
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, product_id: productId, quantity: quantity })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.className = 'order-result success';
+                    resultDiv.innerHTML = `✅ ${data.message} — ${data.order.user} tellis ${data.order.quantity}x ${data.order.product} (€${data.order.total.toFixed(2)})`;
+                } else {
+                    resultDiv.className = 'order-result error';
+                    resultDiv.innerHTML = `❌ Viga: ${data.error}`;
+                }
+            } catch (err) {
+                resultDiv.className = 'order-result error';
+                resultDiv.innerHTML = `❌ Ühenduse viga: ${err.message}`;
+            }
+
+            resultDiv.style.display = 'block';
+            loadOrders();
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch('/api/orders');
+                const data = await response.json();
+                const list = document.getElementById('orders-list');
+
+                if (data.orders.length === 0) {
+                    list.innerHTML = '<p class="empty-state">Tellimusi pole veel. Loo esimene! ☝️</p>';
+                    return;
+                }
+
+                list.innerHTML = data.orders.map(order => `
+                    <div class="order-card">
+                        <div class="order-id">#${order.id}</div>
+                        <div class="order-details">
+                            <strong>${order.user}</strong> — ${order.quantity}x ${order.product}
+                        </div>
+                        <div class="order-total">€${order.total.toFixed(2)}</div>
+                        <div class="order-status">${order.status}</div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Tellimuste laadimine ebaõnnestus:', err);
+            }
+        }
+
+        loadOrders();
+    </script>
+</body>
+</html>

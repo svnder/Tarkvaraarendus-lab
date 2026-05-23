@@ -5,12 +5,13 @@ app = Flask(__name__)
 # ============================================
 # TOODETE TEENUS (Microservice)
 # Vastutab AINULT toodete eest
+# Port: 5002
 # ============================================
 
 products = [
-    {"id": 1, "name": "Sülearvuti", "price": 899.99},
-    {"id": 2, "name": "Hiir", "price": 29.99},
-    {"id": 3, "name": "Klaviatuur", "price": 79.99},
+    {"id": 1, "name": "Sülearvuti", "price": 899.99, "emoji": "💻"},
+    {"id": 2, "name": "Hiir", "price": 29.99, "emoji": "🖱️"},
+    {"id": 3, "name": "Klaviatuur", "price": 79.99, "emoji": "⌨️"},
 ]
 
 

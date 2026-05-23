@@ -7,6 +7,7 @@ app = Flask(__name__)
 # TELLIMUSTE TEENUS (Microservice)
 # Vastutab tellimuste eest
 # Suhtleb teiste teenustega HTTP kaudu!
+# Port: 5003
 # ============================================
 
 USERS_SERVICE = "http://users:5001"
@@ -64,7 +65,7 @@ def create_order():
         "user": user["name"],
         "product": product["name"],
         "quantity": quantity,
-        "total": total,
+        "total": round(total, 2),
         "status": "created"
     }
     orders.append(order)
