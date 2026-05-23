@@ -49,16 +49,11 @@ Lehel on **teenuste staatus** — näed reaalajas kas iga teenus töötab.
 1. Loo tellimus läbi veebi
 2. Pane tähele — gateway saadab päringu → orders → users + products → tagasi
 
-**Testi terminalist** (ava uus aken):
+**Testi terminalist:**
 
 ```bash
-# Kasutajate teenus otse
 curl http://localhost:5051/users
-
-# Toodete teenus otse
 curl http://localhost:5052/products
-
-# Loo tellimus läbi gateway
 curl -X POST http://localhost:5070/api/orders -H "Content-Type: application/json" -d "{\"user_id\": 1, \"product_id\": 2, \"quantity\": 3}"
 ```
 
@@ -68,20 +63,20 @@ curl -X POST http://localhost:5070/api/orders -H "Content-Type: application/json
 
 See on mikroteenuste kõige olulisem õppetund.
 
-**Samm 1 — peata toodete teenus:**
+**Peata toodete teenus:**
 
 ```bash
 docker stop epood-products
 ```
 
-**Samm 2 — vaata brauseris** (värskenda F5):
+**Vaata brauseris** (värskenda F5):
 - Toodete teenuse staatus → **OFFLINE** 🔴
 - Tooted kaovad lehelt
 - Proovi luua tellimus — saad veateate
 
-> **Küsimus:** Kas monoliidis saaks sama juhtuda — et ainult üks osa lakkab töötamast?
+> **Küsimus:** Kas monoliidis saaks sama juhtuda?
 
-**Samm 3 — taasta teenus:**
+**Taasta teenus:**
 
 ```bash
 docker start epood-products
@@ -91,7 +86,7 @@ docker start epood-products
 
 ## 4. Vaata logisid — näe kuidas teenused suhtlevad
 
-Ava **kolm terminali akent** (Mac: Cmd+T / Windows: uus aken):
+Ava **kolm terminali akent**:
 
 ```bash
 # Aken 1
@@ -106,105 +101,123 @@ docker logs -f epood-products
 
 Loo brauseris tellimus ja jälgi kõiki kolme akent korraga.
 
-> **Küsimus:** Kummas on lihtsam probleeme leida — monoliidi üks log vs mikroteenuste mitu logi?
+> **Küsimus:** Kummas on lihtsam probleeme leida?
 
 ---
 
-## 5. Lisa uus toode
+## 5. Ülesanne: Lisa uus toode
 
 Lisa toode: **Monitor**, hind **349.99**, emoji **🖥️**
 
-**Samm 1 — muuda koodi** (ainult toodete teenus!):
+**Mida muudame failis `microservices/products/app.py`:**
+
+```diff
+ products = [
+     {"id": 1, "name": "Sülearvuti", "price": 899.99, "emoji": "💻"},
+     {"id": 2, "name": "Hiir", "price": 29.99, "emoji": "🖱️"},
+     {"id": 3, "name": "Klaviatuur", "price": 79.99, "emoji": "⌨️"},
++    {"id": 4, "name": "Monitor", "price": 349.99, "emoji": "🖥️"},
+ ]
+```
+
+**Tee see automaatselt:**
 
 ```bash
 python3 patches/05-micro-add-product.py
 ```
 
-**Samm 2 — käivita uuesti:**
-
-```bash
-docker compose -f docker-compose.microservices.yml up --build
-```
-
-**Samm 3 — kontrolli brauserist** http://localhost:5070
-
-> **Küsimus:** Muutsid ainult `microservices/products/app.py`. Ühtegi teist teenust ei puudutatud. Monoliidis muutsid sama faili kus on KÕIK. Mis vahe on 10-liikmelises meeskonnas?
+> **Küsimus:** Muutsid ainult `products/app.py`. Ühtegi teist teenust ei puudutatud. Monoliidis muutsid sama faili kus on KÕIK. Mis vahe on 10-liikmelises meeskonnas?
 
 ---
 
-## 6. Lisa uus kasutaja
+## 6. Ülesanne: Lisa uus kasutaja
 
 Lisa kasutaja: **Kati Kask**, email **kati@example.com**
 
-**Samm 1 — muuda koodi** (ainult kasutajate teenus!):
+**Mida muudame failis `microservices/users/app.py`:**
+
+```diff
+ users = [
+     {"id": 1, "name": "Mari Maasikas", "email": "mari@example.com"},
+     {"id": 2, "name": "Jaan Jansen", "email": "jaan@example.com"},
++    {"id": 3, "name": "Kati Kask", "email": "kati@example.com"},
+ ]
+```
+
+**Tee see automaatselt:**
 
 ```bash
 python3 patches/06-micro-add-user.py
 ```
 
-**Samm 2 — käivita uuesti:**
-
-```bash
-docker compose -f docker-compose.microservices.yml up --build
-```
-
-**Samm 3 — kontrolli:**
-
-```bash
-curl http://localhost:5051/users
-```
-
 ---
 
-## 7. Lisa otsingu endpoint
+## 7. Ülesanne: Lisa otsingu endpoint
 
-Lisa toote otsimine nime järgi.
+**Mida muudame failis `microservices/products/app.py`:**
 
-**Samm 1 — muuda koodi:**
+```diff
+-from flask import Flask, jsonify
++from flask import Flask, jsonify, request
+
++@app.route("/products/search", methods=["GET"])
++def search_products():
++    query = request.args.get("name", "").lower()
++    if not query:
++        return jsonify({"error": "Lisa parameeter ?name=otsingusona"}), 400
++    results = [p for p in products if query in p["name"].lower()]
++    return jsonify({"results": results, "count": len(results)})
++
+ @app.route("/products/<int:product_id>", methods=["GET"])
+```
+
+**Tee see automaatselt:**
 
 ```bash
 python3 patches/07-micro-add-search.py
 ```
 
-**Samm 2 — käivita uuesti:**
-
-```bash
-docker compose -f docker-compose.microservices.yml up --build
-```
-
-**Samm 3 — testi** (otse toodete teenuselt):
+**Testi pärast skripti lõppu:**
 
 ```bash
 curl "http://localhost:5052/products/search?name=hiir"
 ```
 
-> **Küsimus:** Miks on aadress `localhost:5052` mitte `localhost:5070`? Sest otsing on toodete teenuse funktsioon — küsid otse toodete teenuselt, mitte gateway kaudu.
+> **Küsimus:** Miks aadress on `localhost:5052` mitte `localhost:5070`? Sest otsing on toodete teenuse funktsioon — küsid otse toodete teenuselt.
 
 ---
 
-## 8. Lisa allahindlus
+## 8. Ülesanne: Lisa allahindlus
 
 Lisa loogika: **kogus 5 või rohkem → 10% allahindlus**.
 
-**Samm 1 — muuda koodi** (ainult tellimuste teenus!):
+**Mida muudame failis `microservices/orders/app.py`:**
+
+```diff
+     quantity = data.get("quantity", 1)
+     total = product["price"] * quantity
+
++    discount = 0
++    if quantity >= 5:
++        discount = total * 0.10
++        total = total - discount
++
+     order = {
+         ...
+         "total": round(total, 2),
+-        "status": "created"
++        "status": "created",
++        "discount": round(discount, 2)
+     }
+```
+
+**Tee see automaatselt:**
 
 ```bash
 python3 patches/08-micro-add-discount.py
 ```
 
-**Samm 2 — käivita uuesti:**
-
-```bash
-docker compose -f docker-compose.microservices.yml up --build
-```
-
-**Samm 3 — testi** (telli 5 toodet):
-
-```bash
-curl -X POST http://localhost:5053/orders -H "Content-Type: application/json" -d "{\"user_id\": 1, \"product_id\": 2, \"quantity\": 5}"
-```
-
-Kontrolli brauserist — tellimusel peaks olema allahindluse summa näha.
+**Testi brauserist** — telli 5+ toodet ja vaata allahindluse summat.
 
 ---
 
@@ -220,7 +233,7 @@ Võrdle monoliidi tulemusega:
 |---|---|---|
 | Keskmine aeg | ___ ms | ___ ms |
 
-> **Küsimus:** Mikroteenused on aeglasemad — miks? Tellimuse loomisel teeb orders-teenus 2 HTTP päringut (users + products). Monoliidis loeb ta andmed otse mälust. Kas see on alati probleem?
+> **Küsimus:** Mikroteenused on aeglasemad — miks? Kas see on alati oluline?
 
 ---
 
@@ -228,43 +241,29 @@ Võrdle monoliidi tulemusega:
 
 ```bash
 docker compose -f docker-compose.microservices.yml up --scale products=3 -d
-```
-
-Kontrolli:
-
-```bash
 docker compose -f docker-compose.microservices.yml ps
 ```
 
-Näed kolm `epood-products` konteinerit! Kasutajate ja tellimuste teenused jäid samaks.
+Näed kolm `epood-products` konteinerit! Teised teenused jäid samaks.
 
-Taasta normaalolek:
+**Taasta normaalolek:**
 
 ```bash
 docker compose -f docker-compose.microservices.yml up --scale products=1 -d
 ```
 
-> **Küsimus:** Black Friday ajal saab toodete teenus 100x rohkem liiklust. Mikroteenustes skaleerid ainult toodete teenust. Monoliidis pead skaleerima kogu rakendust. Mis on rahaline mõju pilves?
+> **Küsimus:** Black Friday ajal saab toodete teenus 100x rohkem liiklust. Mikroteenustes skaleerid ainult toodete teenust. Mis on rahaline mõju pilves?
 
 ---
 
 ## 11. Testi arvustuste teenust
 
 ```bash
-# Lisa arvustus
 curl -X POST http://localhost:5054/reviews -H "Content-Type: application/json" -d "{\"user_id\": 1, \"product_id\": 1, \"rating\": 5, \"comment\": \"Vaga hea!\"}"
-
-# Lisa teine arvustus
-curl -X POST http://localhost:5054/reviews -H "Content-Type: application/json" -d "{\"user_id\": 2, \"product_id\": 1, \"rating\": 3, \"comment\": \"Aku voiks kauem kesta\"}"
-
-# Vaata kõiki arvustusi
 curl http://localhost:5054/reviews
-
-# Vaata ühe toote arvustusi
-curl http://localhost:5054/reviews/product/1
 ```
 
-> **Küsimus:** Arvustuste teenuse lisamiseks ei muudetud ühtegi olemasolevat faili. Monoliidis peaksid muutma `app.py` faili kus on juba kõik muu. Kumba eelistad 50-liikmelises meeskonnas?
+> **Küsimus:** Arvustuste teenuse lisamiseks ei muudetud ühtegi olemasolevat faili. Kumba eelistad 50-liikmelises meeskonnas?
 
 ---
 

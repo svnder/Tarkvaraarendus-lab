@@ -42,13 +42,8 @@ Ava brauseris: **http://localhost:5050**
 **Testi terminalist** (ava uus aken):
 
 ```bash
-# Vaata kasutajaid
 curl http://localhost:5050/api/users
-
-# Vaata tooteid
 curl http://localhost:5050/api/products
-
-# Loo tellimus
 curl -X POST http://localhost:5050/api/orders -H "Content-Type: application/json" -d "{\"user_id\": 1, \"product_id\": 2, \"quantity\": 3}"
 ```
 
@@ -65,67 +60,78 @@ Ava fail `monolith/app.py`. Pane tähele — **kõik on ühes failis**:
 
 ---
 
-## 4. Lisa uus toode
+## 4. Ülesanne: Lisa uus toode
 
 Lisa toode: **Monitor**, hind **349.99**, emoji **🖥️**
 
-**Samm 1 — muuda koodi:**
+**Mida muudame failis `monolith/app.py`:**
+
+```diff
+ products = [
+     {"id": 1, "name": "Sülearvuti", "price": 899.99, "emoji": "💻"},
+     {"id": 2, "name": "Hiir", "price": 29.99, "emoji": "🖱️"},
+     {"id": 3, "name": "Klaviatuur", "price": 79.99, "emoji": "⌨️"},
++    {"id": 4, "name": "Monitor", "price": 349.99, "emoji": "🖥️"},
+ ]
+```
+
+**Tee see automaatselt:**
 
 ```bash
 python3 patches/01-monolith-add-product.py
 ```
 
-**Samm 2 — käivita uuesti:**
-
-```bash
-docker compose -f docker-compose.monolith.yml up --build
-```
-
-**Samm 3 — kontrolli brauserist** http://localhost:5050 — Monitor peaks ilmuma toodete nimekirja.
+Skript muudab koodi, käivitab rebuildi ja ütleb kui valmis. Mine siis brauserisse vaatama.
 
 ---
 
-## 5. Lisa uus kasutaja
+## 5. Ülesanne: Lisa uus kasutaja
 
 Lisa kasutaja: **Kati Kask**, email **kati@example.com**
 
-**Samm 1 — muuda koodi:**
+**Mida muudame failis `monolith/app.py`:**
+
+```diff
+ users = [
+     {"id": 1, "name": "Mari Maasikas", "email": "mari@example.com"},
+     {"id": 2, "name": "Jaan Jansen", "email": "jaan@example.com"},
++    {"id": 3, "name": "Kati Kask", "email": "kati@example.com"},
+ ]
+```
+
+**Tee see automaatselt:**
 
 ```bash
 python3 patches/02-monolith-add-user.py
 ```
 
-**Samm 2 — käivita uuesti:**
-
-```bash
-docker compose -f docker-compose.monolith.yml up --build
-```
-
-**Samm 3 — kontrolli:**
-
-```bash
-curl http://localhost:5050/api/users
-```
-
 ---
 
-## 6. Lisa otsingu endpoint
+## 6. Ülesanne: Lisa otsingu endpoint
 
 Lisa toote otsimine nime järgi.
 
-**Samm 1 — muuda koodi:**
+**Mida muudame failis `monolith/app.py`:**
+
+```diff
++@app.route("/api/products/search", methods=["GET"])
++def search_products():
++    query = request.args.get("name", "").lower()
++    if not query:
++        return jsonify({"error": "Lisa parameeter ?name=otsingusona"}), 400
++    results = [p for p in products if query in p["name"].lower()]
++    return jsonify({"results": results, "count": len(results)})
++
+ @app.route("/api/products/<int:product_id>", methods=["GET"])
+```
+
+**Tee see automaatselt:**
 
 ```bash
 python3 patches/03-monolith-add-search.py
 ```
 
-**Samm 2 — käivita uuesti:**
-
-```bash
-docker compose -f docker-compose.monolith.yml up --build
-```
-
-**Samm 3 — testi:**
+**Testi pärast skripti lõppu:**
 
 ```bash
 curl "http://localhost:5050/api/products/search?name=hiir"
@@ -133,29 +139,37 @@ curl "http://localhost:5050/api/products/search?name=hiir"
 
 ---
 
-## 7. Lisa allahindlus
+## 7. Ülesanne: Lisa allahindlus
 
 Lisa loogika: **kogus 5 või rohkem → 10% allahindlus**.
 
-**Samm 1 — muuda koodi:**
+**Mida muudame failis `monolith/app.py`:**
+
+```diff
+     quantity = data.get("quantity", 1)
+     total = product["price"] * quantity
+
++    discount = 0
++    if quantity >= 5:
++        discount = total * 0.10
++        total = total - discount
++
+     order = {
+         ...
+         "total": round(total, 2),
+-        "status": "created"
++        "status": "created",
++        "discount": round(discount, 2)
+     }
+```
+
+**Tee see automaatselt:**
 
 ```bash
 python3 patches/04-monolith-add-discount.py
 ```
 
-**Samm 2 — käivita uuesti:**
-
-```bash
-docker compose -f docker-compose.monolith.yml up --build
-```
-
-**Samm 3 — testi** (telli 5 toodet):
-
-```bash
-curl -X POST http://localhost:5050/api/orders -H "Content-Type: application/json" -d "{\"user_id\": 1, \"product_id\": 2, \"quantity\": 5}"
-```
-
-Kontrolli brauserist — tellimusel peaks olema allahindluse summa näha.
+**Testi brauserist** — telli 5+ toodet ja vaata allahindluse summat tellimuse kaardil.
 
 ---
 
@@ -175,6 +189,7 @@ Loo brauseris tellimus. Näed terminalis kõiki päringuid **ühes kohas**.
 
 ## 9. Kiiruse mõõtmine
 
+**Mac / Linux:**
 ```bash
 for i in 1 2 3 4 5; do time curl -s -X POST http://localhost:5050/api/orders -H "Content-Type: application/json" -d "{\"user_id\": 1, \"product_id\": 1, \"quantity\": 1}" > /dev/null; done
 ```
