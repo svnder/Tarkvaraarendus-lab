@@ -13,9 +13,9 @@ Selles laboris võrdled kahte arhitektuurimudelit – **monoliitset** ja **mikro
 ├── monolith/              # Kõik ühes rakenduses
 │   └── app.py             # Üks fail = kogu rakendus
 ├── microservices/         # Eraldi teenused
-│   ├── users/             # Kasutajate teenus (port 5001)
-│   ├── products/          # Toodete teenus (port 5002)
-│   └── orders/            # Tellimuste teenus (port 5003)
+│   ├── users/             # Kasutajate teenus (port 5051)
+│   ├── products/          # Toodete teenus (port 5052)
+│   └── orders/            # Tellimuste teenus (port 5053)
 ├── docker-compose.monolith.yml
 └── docker-compose.microservices.yml
 ```
@@ -34,18 +34,18 @@ docker compose -f docker-compose.monolith.yml up --build
 
 ```bash
 # Vaata kõiki kasutajaid
-curl http://localhost:5000/users
+curl http://localhost:5050/users
 
 # Vaata kõiki tooteid
-curl http://localhost:5000/products
+curl http://localhost:5050/products
 
 # Loo tellimus
-curl -X POST http://localhost:5000/orders \
+curl -X POST http://localhost:5050/orders \
   -H "Content-Type: application/json" \
   -d '{"user_id": 1, "product_id": 2, "quantity": 3}'
 
 # Vaata tellimusi
-curl http://localhost:5000/orders
+curl http://localhost:5050/orders
 ```
 
 ### Peata monoliit
@@ -67,19 +67,19 @@ docker compose -f docker-compose.microservices.yml up --build
 ### Testi (uues terminali aknas)
 
 ```bash
-# Kasutajate teenus (port 5001)
-curl http://localhost:5001/users
+# Kasutajate teenus (port 5051)
+curl http://localhost:5051/users
 
-# Toodete teenus (port 5002)
-curl http://localhost:5002/products
+# Toodete teenus (port 5052)
+curl http://localhost:5052/products
 
-# Tellimuste teenus (port 5003) - see suhtleb teiste teenustega!
-curl -X POST http://localhost:5003/orders \
+# Tellimuste teenus (port 5053) - see suhtleb teiste teenustega!
+curl -X POST http://localhost:5053/orders \
   -H "Content-Type: application/json" \
   -d '{"user_id": 1, "product_id": 2, "quantity": 3}'
 
 # Vaata tellimusi
-curl http://localhost:5003/orders
+curl http://localhost:5053/orders
 ```
 
 ### Peata mikroteenused
@@ -107,7 +107,7 @@ docker stop epood-products
 
 Proovi nüüd luua tellimus:
 ```bash
-curl -X POST http://localhost:5003/orders \
+curl -X POST http://localhost:5053/orders \
   -H "Content-Type: application/json" \
   -d '{"user_id": 1, "product_id": 1, "quantity": 1}'
 ```
