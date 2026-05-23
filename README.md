@@ -41,7 +41,7 @@ Tarkvaraarendus-lab/
 │   ├── orders/                        # Tellimuste teenus (port 5053)
 │   │   ├── app.py
 │   │   └── ...
-│   └── gateway/                       # API Gateway — veebileht (port 5060)
+│   └── gateway/                       # API Gateway — veebileht (port 5070)
 │       ├── app.py
 │       ├── templates/index.html
 │       └── static/style.css
@@ -110,14 +110,14 @@ docker compose -f docker-compose.microservices.yml up --build
 ```
 
 See käivitab **4 eraldi konteinerit**:
-- `epood-gateway` — veebileht (port 5060)
+- `epood-gateway` — veebileht (port 5070)
 - `epood-users` — kasutajate teenus (port 5051)
 - `epood-products` — toodete teenus (port 5052)
 - `epood-orders` — tellimuste teenus (port 5053)
 
 ### 3.2 Ava brauseris
 
-Mine aadressile: **http://localhost:5060**
+Mine aadressile: **http://localhost:5070**
 
 Pane tähele:
 - Lehel on **teenuste staatus** — näed reaalajas, kas iga teenus töötab
@@ -151,7 +151,7 @@ docker compose -f docker-compose.microservices.yml up --build
 
 ### 4.2 Ava brauser
 
-Mine **http://localhost:5060** ja veendu, et kõik teenused on "ONLINE".
+Mine **http://localhost:5070** ja veendu, et kõik teenused on "ONLINE".
 
 ### 4.3 Peata toodete teenus
 

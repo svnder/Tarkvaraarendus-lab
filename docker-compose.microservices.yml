@@ -2,7 +2,7 @@ services:
   gateway:
     build: ./microservices/gateway
     ports:
-      - "5060:5000"
+      - "5070:5000"
     container_name: epood-gateway
     depends_on:
       - users
