@@ -1,0 +1,21 @@
+--- a/monolith/app.py
++++ b/monolith/app.py
+@@ -1,6 +1,12 @@
+     quantity = data.get("quantity", 1)
+     total = product["price"] * quantity
+ 
++    discount = 0
++    if quantity >= 5:
++        discount = total * 0.10
++        total = total - discount
++
+     order = {
+         "id": next_order_id,
+         "user": user["name"],
+         "product": product["name"],
+         "quantity": quantity,
+         "total": round(total, 2),
+-        "status": "created"
++        "status": "created",
++        "discount": round(discount, 2)
+     }

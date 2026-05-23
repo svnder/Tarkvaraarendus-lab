@@ -60,13 +60,19 @@ def create_order():
     quantity = data.get("quantity", 1)
     total = product["price"] * quantity
 
+    discount = 0
+    if quantity >= 5:
+        discount = total * 0.10
+        total = total - discount
+
     order = {
         "id": next_order_id,
         "user": user["name"],
         "product": product["name"],
         "quantity": quantity,
         "total": round(total, 2),
-        "status": "created"
+        "status": "created",
+        "discount": round(discount, 2)
     }
     orders.append(order)
     next_order_id += 1

@@ -1,0 +1,15 @@
+--- a/monolith/app.py
++++ b/monolith/app.py
+@@ -1,4 +1,4 @@
+-from flask import Flask, jsonify, request, render_template
++from flask import Flask, jsonify, request, render_template
+ 
++@app.route("/api/products/search", methods=["GET"])
++def search_products():
++    query = request.args.get("name", "").lower()
++    if not query:
++        return jsonify({"error": "Lisa parameeter ?name=otsingusõna"}), 400
++    results = [p for p in products if query in p["name"].lower()]
++    return jsonify({"results": results, "count": len(results)})
++
+ @app.route("/api/products/<int:product_id>", methods=["GET"])

@@ -1,0 +1,15 @@
+--- a/microservices/products/app.py
++++ b/microservices/products/app.py
+@@ -1,4 +1,4 @@
+-from flask import Flask, jsonify
++from flask import Flask, jsonify, request
+ 
++@app.route("/products/search", methods=["GET"])
++def search_products():
++    query = request.args.get("name", "").lower()
++    if not query:
++        return jsonify({"error": "Lisa parameeter ?name=otsingusõna"}), 400
++    results = [p for p in products if query in p["name"].lower()]
++    return jsonify({"results": results, "count": len(results)})
++
+ @app.route("/products/<int:product_id>", methods=["GET"])

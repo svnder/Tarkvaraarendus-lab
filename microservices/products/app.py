@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
@@ -24,6 +24,15 @@ def index():
 def get_products():
     return jsonify({"products": products})
 
+
+
+@app.route("/products/search", methods=["GET"])
+def search_products():
+    query = request.args.get("name", "").lower()
+    if not query:
+        return jsonify({"error": "Lisa parameeter ?name=otsingusona"}), 400
+    results = [p for p in products if query in p["name"].lower()]
+    return jsonify({"results": results, "count": len(results)})
 
 @app.route("/products/<int:product_id>", methods=["GET"])
 def get_product(product_id):
