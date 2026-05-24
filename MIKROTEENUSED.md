@@ -241,22 +241,24 @@ Võrdle monoliidi tulemusega:
 
 Kujuta ette et on Black Friday ja toodete teenus saab 100x rohkem liiklust. Mikroteenustes saad käivitada toodete teenusest mitu koopiat — teised teenused jäävad puutumata.
 
+Skaleerimiseks on kaks takistust mida peame lahendama:
+1. Fikseeritud konteineri nimi — takistab mitme koopia loomist
+2. Fikseeritud port — mitu koopiat ei saa sama porti kasutada
+
 **Mida muudame failis `docker-compose.microservices.yml`:**
 
 ```diff
    products:
      build: ./microservices/products
-     ports:
-       - "5052:5002"
--    container_name: epood-products
+-    ports:
+-      - "5052:5002"
 ```
 
-> Miks? Docker nõuab et igal konteineril oleks unikaalne nimi. Fikseeritud nimi `epood-products` takistab mitme koopia käivitamist. Kui eemaldame selle, genereerib Docker nimed automaatselt.
-
-**Samm 1 — eemalda fikseeritud konteineri nimi:**
+**Samm 1 — eemalda products teenuse port:**
 
 ```bash
-sed -i '' '/container_name: epood-products/d' docker-compose.microservices.yml
+sed -i '' '/5052:5002/d' docker-compose.microservices.yml
+sed -i '' '/ports/{n;/5052/d;}' docker-compose.microservices.yml
 ```
 
 **Samm 2 — käivita uuesti:**
@@ -278,7 +280,9 @@ docker compose -f docker-compose.microservices.yml up --scale products=3 -d
 docker compose -f docker-compose.microservices.yml ps
 ```
 
-Näed kolm products konteinerit! Kasutajate ja tellimuste teenused jäid 1 koopiana.
+Näed kolm products konteinerit! Kasutajate ja tellimuste teenused jäid 1 koopiana. Rakendus töötab endiselt läbi gateway `http://localhost:5070` — products teenus on gateway jaoks kättesaadav Dockeri sisevõrgu kaudu.
+
+> **Miks port eemaldada?** Väline port (5052) on mõeldud otseühenduseks sinu arvutist. Konteinerid omavahel ei kasuta seda porti — nad suhtlevad Dockeri sisevõrgu kaudu. Seega skaleerimiseks välist porti pole vaja.
 
 **Monoliidis** ei saaks nii teha — seal on kõik ühes. Skaleerimiseks peaksid käivitama kogu rakenduse 3 koopiana, kuigi probleem oli ainult toodete juures. Pilves (AWS, Azure) maksad iga konteineri eest — see vahe on rahaline.
 
@@ -289,7 +293,6 @@ docker compose -f docker-compose.microservices.yml up --scale products=1 -d
 ```
 
 > **Küsimus:** Mitu eurot kuus säästaksid pilves kui pead skaleerima ainult toodete teenust vs kogu monoliiti?
-
 ---
 
 ## 11. Testi arvustuste teenust
