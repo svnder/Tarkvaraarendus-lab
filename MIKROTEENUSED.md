@@ -239,22 +239,46 @@ Võrdle monoliidi tulemusega:
 
 ## 10. Skaleeri üht teenust
 
-Kujuta ette et on Black Friday ja toodete teenus saab 100x rohkem liiklust.
-Mikroteenustes saad käivitada toodete teenusest mitu koopiat — teised teenused jäävad puutumata.
+Kujuta ette et on Black Friday ja toodete teenus saab 100x rohkem liiklust. Mikroteenustes saad käivitada toodete teenusest mitu koopiat — teised teenused jäävad puutumata.
 
-**Käivita 3 koopiat toodete teenusest:**
+**Mida muudame failis `docker-compose.microservices.yml`:**
+
+```diff
+   products:
+     build: ./microservices/products
+     ports:
+       - "5052:5002"
+-    container_name: epood-products
+```
+
+> Miks? Docker nõuab et igal konteineril oleks unikaalne nimi. Fikseeritud nimi `epood-products` takistab mitme koopia käivitamist. Kui eemaldame selle, genereerib Docker nimed automaatselt.
+
+**Samm 1 — eemalda fikseeritud konteineri nimi:**
+
+```bash
+sed -i '' '/container_name: epood-products/d' docker-compose.microservices.yml
+```
+
+**Samm 2 — käivita uuesti:**
+
+```bash
+docker compose -f docker-compose.microservices.yml down
+docker compose -f docker-compose.microservices.yml up --build -d
+```
+
+**Samm 3 — skaleeri 3 koopiani:**
 
 ```bash
 docker compose -f docker-compose.microservices.yml up --scale products=3 -d
 ```
 
-**Kontrolli — näed kolm products konteinerit:**
+**Samm 4 — kontrolli:**
 
 ```bash
 docker compose -f docker-compose.microservices.yml ps
 ```
 
-Docker jagab liikluse kolme konteineri vahel automaatselt. Kasutajate ja tellimuste teenused jäid endiselt 1 koopiana.
+Näed kolm products konteinerit! Kasutajate ja tellimuste teenused jäid 1 koopiana.
 
 **Monoliidis** ei saaks nii teha — seal on kõik ühes. Skaleerimiseks peaksid käivitama kogu rakenduse 3 koopiana, kuigi probleem oli ainult toodete juures. Pilves (AWS, Azure) maksad iga konteineri eest — see vahe on rahaline.
 
@@ -264,7 +288,7 @@ Docker jagab liikluse kolme konteineri vahel automaatselt. Kasutajate ja tellimu
 docker compose -f docker-compose.microservices.yml up --scale products=1 -d
 ```
 
-> **Küsimus:** Black Friday ajal saab toodete teenus 100x rohkem liiklust. Mikroteenustes skaleerid ainult toodete teenust. Mis on rahaline mõju pilves?
+> **Küsimus:** Mitu eurot kuus säästaksid pilves kui pead skaleerima ainult toodete teenust vs kogu monoliiti?
 
 ---
 
