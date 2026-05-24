@@ -239,12 +239,24 @@ Võrdle monoliidi tulemusega:
 
 ## 10. Skaleeri üht teenust
 
+Kujuta ette et on Black Friday ja toodete teenus saab 100x rohkem liiklust.
+Mikroteenustes saad käivitada toodete teenusest mitu koopiat — teised teenused jäävad puutumata.
+
+**Käivita 3 koopiat toodete teenusest:**
+
 ```bash
 docker compose -f docker-compose.microservices.yml up --scale products=3 -d
+```
+
+**Kontrolli — näed kolm products konteinerit:**
+
+```bash
 docker compose -f docker-compose.microservices.yml ps
 ```
 
-Näed kolm `epood-products` konteinerit! Teised teenused jäid samaks.
+Docker jagab liikluse kolme konteineri vahel automaatselt. Kasutajate ja tellimuste teenused jäid endiselt 1 koopiana.
+
+**Monoliidis** ei saaks nii teha — seal on kõik ühes. Skaleerimiseks peaksid käivitama kogu rakenduse 3 koopiana, kuigi probleem oli ainult toodete juures. Pilves (AWS, Azure) maksad iga konteineri eest — see vahe on rahaline.
 
 **Taasta normaalolek:**
 
