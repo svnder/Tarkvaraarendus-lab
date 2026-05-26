@@ -323,6 +323,14 @@ curl -X POST http://localhost:5054/reviews -H "Content-Type: application/json" -
 curl http://localhost:5054/reviews
 ```
 
+```bash
+Invoke-RestMethod `
+  -Method POST `
+  -Uri "http://localhost:5054/reviews" `
+  -Headers @{ "Content-Type" = "application/json" } `
+  -Body '{"user_id":1,"product_id":1,"rating":5,"comment":"Vaga hea!"}'
+```
+
 > **Küsimus:** Arvustuste teenuse lisamiseks ei muudetud ühtegi olemasolevat faili. Kumba eelistad 50-liikmelises meeskonnas?
 
 ---
