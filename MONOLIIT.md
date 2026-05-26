@@ -44,7 +44,11 @@ Ava brauseris: **http://localhost:5050**
 ```bash
 curl http://localhost:5050/api/users
 curl http://localhost:5050/api/products
-curl -X POST http://localhost:5050/api/orders -H "Content-Type: application/json" -d "{\"user_id\": 1, \"product_id\": 2, \"quantity\": 3}"
+Invoke-RestMethod `
+  -Method POST `
+  -Uri "http://localhost:5050/api/orders" `
+  -Headers @{ "Content-Type" = "application/json" } `
+  -Body '{"user_id":1,"product_id":2,"quantity":3}'
 ```
 
 ---
