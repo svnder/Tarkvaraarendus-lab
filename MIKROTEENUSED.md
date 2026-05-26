@@ -54,7 +54,11 @@ Lehel on **teenuste staatus** — näed reaalajas kas iga teenus töötab.
 ```bash
 curl http://localhost:5051/users
 curl http://localhost:5052/products
-curl -X POST http://localhost:5070/api/orders -H "Content-Type: application/json" -d "{\"user_id\": 1, \"product_id\": 2, \"quantity\": 3}"
+Invoke-RestMethod `
+  -Method POST `
+  -Uri "http://localhost:5070/api/orders" `
+  -Headers @{ "Content-Type" = "application/json" } `
+  -Body '{"user_id":1,"product_id":2,"quantity":3}'
 ```
 
 ---
