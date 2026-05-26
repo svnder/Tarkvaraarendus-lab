@@ -274,6 +274,15 @@ sed -i '' '/container_name: epood-products/d' docker-compose.microservices.yml
 sed -i '' '/5052:5002/d' docker-compose.microservices.yml
 ```
 
+```bash 
+(Get-Content docker-compose.microservices.yml) `
+| Where-Object {
+    $_ -notmatch 'container_name: epood-products' -and
+    $_ -notmatch '5052:5002'
+} `
+| Set-Content docker-compose.microservices.yml
+```
+
 **Samm 2 — käivita uuesti:**
 
 ```bash
