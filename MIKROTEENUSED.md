@@ -231,6 +231,16 @@ python3 patches/08-micro-add-discount.py
 for i in 1 2 3 4 5; do time curl -s -X POST http://localhost:5070/api/orders -H "Content-Type: application/json" -d "{\"user_id\": 1, \"product_id\": 1, \"quantity\": 1}" > /dev/null; done
 ```
 
+```bash
+1..5 | ForEach-Object {
+    Measure-Command {
+        curl.exe -s -X POST "http://localhost:5070/api/orders" `
+          -H "Content-Type: application/json" `
+          -d "{\"user_id\":1,\"product_id\":1,\"quantity\":1}" > $null
+    }
+}
+```
+
 Võrdle monoliidi tulemusega:
 
 | | Monoliit | Mikroteenused |
