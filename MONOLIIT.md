@@ -197,6 +197,16 @@ Loo brauseris tellimus. Näed terminalis kõiki päringuid **ühes kohas**.
 ```bash
 for i in 1 2 3 4 5; do time curl -s -X POST http://localhost:5050/api/orders -H "Content-Type: application/json" -d "{\"user_id\": 1, \"product_id\": 1, \"quantity\": 1}" > /dev/null; done
 ```
+**Windows**
+``` bash
+1..5 | ForEach-Object {
+    Measure-Command {
+        curl.exe -s -X POST "http://localhost:5050/api/orders" `
+          -H "Content-Type: application/json" `
+          -d "{\"user_id\":1,\"product_id\":1,\"quantity\":1}" > $null
+    }
+}
+```
 
 Pane kirja keskmine `real` väärtus — võrdled hiljem mikroteenustega.
 
